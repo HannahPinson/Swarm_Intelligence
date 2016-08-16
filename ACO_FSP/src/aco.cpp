@@ -4,7 +4,6 @@
 
 using namespace std;
 
-//char * instance_file;
 string instance_file;
 FSP* fsp;
 
@@ -211,17 +210,19 @@ double mutate(){
 	for (int i = 0; i < tasks; i++){
 		for (int j = 0; j <tasks; j++){
 
-			long int seed = std::chrono::system_clock::now().time_since_epoch().count()/rand();
+			/*long int seed = std::chrono::system_clock::now().time_since_epoch().count()/rand();
 			srand(seed);
-			double randVal = ((double) rand() / (RAND_MAX));
+			double randVal = ((double) rand() / (RAND_MAX));*/
+
+			double randVal = ran01(&seed);
 
 			//mutate with probability = mutation_probability
 			if (mutation_probability > randVal){
 
-				seed = std::chrono::system_clock::now().time_since_epoch().count()/rand();
+				/*seed = std::chrono::system_clock::now().time_since_epoch().count()/rand();
 				srand(seed);
-				randVal = ((double) rand() / (RAND_MAX));
-
+				randVal = ((double) rand() / (RAND_MAX));*/
+				randVal = ran01(&seed);
 
 				if (randVal < 0.5){ // a = 0 : add mutation value
 					(pheromone[i])[j] += mutationValue();
@@ -333,7 +334,7 @@ int main(int argc, char *argv[] ){
 
 			worst_makespan = 0;
 			for(int i=0; i< n_ants; i++){
-				colony[i].Search();
+				colony[i].Search(seed);
 				if(best_makespan > colony[i].getMakespan()){
 					best_makespan = colony[i].getMakespan();
 					best_ant.copyFrom(colony[i]); // ! global best ant

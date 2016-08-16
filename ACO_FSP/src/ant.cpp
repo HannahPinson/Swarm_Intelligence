@@ -57,7 +57,7 @@ bool Ant::alreadyScheduled(long int task, long int currentIndex){
 
 
 /*Generate tour using probabilities*/
-void Ant::Search(){
+void Ant::Search(long int seed){
 
 	for (int i = 0; i < tasks; i++){
 		//cout << "considering position " << i << endl;
@@ -77,9 +77,10 @@ void Ant::Search(){
 			accul_prob_vec[j] = accul_prob_vec[j] / accul_prob; //renormalization
 		}
 		// select next task based on probability
-		long int seed = std::chrono::system_clock::now().time_since_epoch().count()/rand();
+		/*long int seed = std::chrono::system_clock::now().time_since_epoch().count()/rand();
 		srand(seed);
-		double randVal = ((double) rand() / (RAND_MAX));
+		double randVal = ((double) rand() / (RAND_MAX));*/
+		double randVal = ran01(&seed);
 		long int selectedTask;
 		//cout << "number of tasks to choose from: " << toSelectFrom.size() << endl;
 		for (int j=0; j < toSelectFrom.size(); j++){

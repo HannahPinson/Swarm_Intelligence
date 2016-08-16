@@ -35,7 +35,7 @@ class Ant{
     long int machines;
     long int tasks;
 
-    void ComputeMakespan(); //to implement
+    void ComputeMakespan();
     double computeEFT(long int task, long int position, long int machine, double ** earliest_finish_times);
 
     public:
@@ -44,7 +44,7 @@ class Ant{
        ~Ant();
        Ant(Ant const &other);
 
-       void Search(); //to implement
+       void Search(long int seed);
        long int getMakespan();
        long int * getSequence(){return sequence;};
 
