@@ -1,0 +1,20 @@
+!SESSION 2016-08-16 11:00:11.737 -----------------------------------------------
+eclipse.buildId=4.5.1.M20150904-0015
+java.version=1.8.0_65
+java.vendor=Oracle Corporation
+BootLoader constants: OS=macosx, ARCH=x86_64, WS=cocoa, NL=en_US
+Framework arguments:  -product org.eclipse.epp.package.java.product -product org.eclipse.epp.package.java.product -keyring /Users/Hannah_Pinson/.eclipse_keyring -showlocation
+Command-line arguments:  -os macosx -ws cocoa -arch x86_64 -product org.eclipse.epp.package.java.product -data /Users/Hannah_Pinson/Documents/vub/swarm_intelligence/project_git -product org.eclipse.epp.package.java.product -keyring /Users/Hannah_Pinson/.eclipse_keyring -showlocation
+
+!ENTRY org.eclipse.core.net 1 0 2016-08-16 11:00:14.378
+!MESSAGE System property http.nonProxyHosts has been set to local|*.local|169.254/16|*.169.254/16 by an external source. This value will be overwritten using the values from the preferences
+
+!ENTRY org.eclipse.core.resources 4 77 2016-08-16 11:02:08.089
+!MESSAGE Invalid project description.
+!SUBENTRY 1 unknown 0 0 2016-08-16 11:02:08.089
+!MESSAGE OK
+!SUBENTRY 1 org.eclipse.core.resources 4 77 2016-08-16 11:02:08.090
+!MESSAGE /Users/Hannah_Pinson/Documents/vub/swarm_intelligence/project_git overlaps the workspace location: /Users/Hannah_Pinson/Documents/vub/swarm_intelligence/project_git
+
+!ENTRY org.eclipse.cdt.core 1 0 2016-08-16 11:02:51.751
+!MESSAGE Indexed 'ACO_FSP' (0 sources, 0 headers) in 0,003 sec: 0 declarations; 0 references; 0 unresolved inclusions; 0 syntax errors; 0 unresolved names (0%)

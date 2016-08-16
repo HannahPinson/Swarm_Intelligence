@@ -1,0 +1,383 @@
+
+#include "aco.h"
+
+
+using namespace std;
+
+//char * instance_file;
+string instance_file;
+FSP* fsp;
+
+/*Probabilistic rule related variables*/
+double  ** pheromone;   /* pheromone matrix */
+double  ** heuristic;   /* heuristic information matrix */
+double  ** probability;    /* combined value of pheromone X heuristic information */
+double initial_pheromone=1;
+
+long int max_iterations;   //Max iterations
+long int iterations=0;
+long int max_tours;        //Max tours
+long int tours=0;
+double alpha;
+double beta;
+double rho;
+long int n_ants;
+long int seed = -1;
+
+
+vector<Ant> colony;
+Ant best_ant;
+Ant worst_ant;
+long int best_makespan=LONG_MAX;     /* length of the shortest makespan found */
+long int worst_makespan = 0;
+
+long int machines;
+long int tasks;
+
+// best ant worst ant variables
+double stagnation_treshold;
+double mutation_treshold;
+double last_restart = 0;
+double mutation_probability;
+double sigma;
+
+/*Default parameters: set them!*/
+void setDefaultParameters(){
+	alpha=1;
+	beta=1;
+	rho=0.1;
+	n_ants=1;
+	max_tours=1;
+	max_iterations= max_tours / n_ants;
+	instance_file="";
+	seed = (long int) time(NULL);
+
+	stagnation_treshold = 0.20;
+	mutation_probability = 0.10;
+	sigma = 4;
+}
+
+/*Print default parameters*/
+void printParameters(){
+	cout << "\nACO parameters:\n"
+			<< "  ants: "  << n_ants << "\n"
+			<< "  alpha: " << alpha << "\n"
+			<< "  beta: "  << beta << "\n"
+			<< "  rho: "   << rho << "\n"
+			<< "  tours: " << max_tours << "\n"
+			<< "  iterations: "   << max_iterations << "\n"
+			<< "  seed: "   << seed << "\n"
+			<< "  initial pheromone: "   << initial_pheromone << "\n"
+			<< endl;
+}
+
+/* Read arguments from command line */
+bool readArguments(int argc, char *argv[] ){
+
+	setDefaultParameters();
+
+	for(int i=1; i< argc ; i++){
+		if(strcmp(argv[i], "--ants") == 0){
+			n_ants = atol(argv[i+1]);
+			i++;
+		} else if(strcmp(argv[i], "--alpha") == 0){
+			alpha = atof(argv[i+1]);
+			i++;
+		} else if(strcmp(argv[i], "--beta") == 0){
+			beta = atof(argv[i+1]);
+			i++;
+		} else if(strcmp(argv[i], "--rho") == 0) {
+			rho = atof(argv[i+1]);
+			i++;
+		} else if(strcmp(argv[i], "--iterations") == 0) {
+			max_iterations = atol(argv[i+1]);
+			i++;
+		} else if(strcmp(argv[i], "--tours") == 0) {
+			max_tours = atol(argv[i+1]);
+			i++;
+		} else if(strcmp(argv[i], "--seed") == 0) {
+			seed = atol(argv[i+1]);
+			i++;
+		}else if(strcmp(argv[i], "--instance") == 0) {
+			instance_file = argv[i+1];
+			i++;
+		}else if(strcmp(argv[i], "--sigma") == 0) {
+			sigma = atol(argv[i+1]);
+			i++;
+		}else if(strcmp(argv[i], "--stagnation_treshold") == 0) {
+			stagnation_treshold = atol(argv[i+1]);
+			i++;
+		}
+		else if(strcmp(argv[i], "--mutation_probability") == 0) {
+			mutation_probability = atol(argv[i+1]);
+			i++;
+		}
+		else{
+			cout << "Parameter " << argv[i] << "no recognized.\n";
+			return(false);
+		}
+	}
+	if(instance_file.empty()){
+		cout << "No instance file provided.\n";
+		return(false);
+	}
+	//printParameters();
+	return(true);
+}
+
+/*Create colony structure*/
+void createColony (){
+	colony.clear();
+	//cout << "Creating colony.\n\n";
+	for (int i = 0 ; i < n_ants ; i++ ) {
+		colony.push_back(Ant(fsp, probability, pheromone));
+	}
+}
+
+/*Initialize pheromone with an initial value*/
+void initializePheromone( double initial_value ) {
+	pheromone = new double * [tasks];
+	for (int i = 0 ; i < tasks ; i++ ) {
+		pheromone[i] = new double [tasks];
+		for (int j = 0  ; j < tasks ; j++ )
+			pheromone[i][j] = initial_value;
+	}
+}
+
+void printMatrix ( double ** matrix ) {
+	long int i, j;
+	long int size = tasks;
+	printf("\n");
+	for ( i = 0 ; i < size ; i++ ) {
+		for ( j = 0 ; j < size ; j++ ) {
+			printf(" %lf ", matrix[i][j]);
+		}
+		printf("\n");
+	}
+}
+
+// Initialize the heuristic information matrix
+void initializeHeuristic () {
+	long int size = tasks;
+	heuristic = new double * [size];
+	for (int i = 0; i < size; i++){
+		heuristic[i] = new double [size];
+		for (int j = 0; j < size; j++){
+			if (i!=j){
+				heuristic[i][j] = 0; // 1./(tsp->getDistance(i,j));
+			}
+			else {
+				heuristic[i][j] = 0;
+			}
+		}
+	}
+}
+
+
+// Calculate probability in base of heuristic
+// information and pheromone
+void calculateProbability () {
+	long int size = tasks;
+	for (int i = 0; i < size; i++){
+		for (int j = 0; j < size; j++){
+			(probability[i])[j] = pow(pheromone[i][j], alpha); // * pow(heuristic[i][j], beta);
+		}
+	}
+}
+
+void initializeProbability(){
+	probability = new double * [tasks];
+	for (int i = 0; i < tasks; i++){
+		probability[i] = new double [tasks];
+	}
+	calculateProbability();
+}
+
+
+//calculate the mutation treshold = average of pheromone over the trails of the best solution
+double mutationTreshold(){
+	double sum = 0;
+	for (int i = 0; i < tasks; i++){
+		sum += (pheromone[i])[best_ant.getSequence()[i]];
+	}
+	return (double) sum / (double) tasks;
+}
+
+double mutationValue(){
+	return  (double) (iterations - last_restart)/ (double)(max_iterations - last_restart) * sigma * mutation_treshold;
+}
+
+double mutate(){
+	for (int i = 0; i < tasks; i++){
+		for (int j = 0; j <tasks; j++){
+
+			long int seed = std::chrono::system_clock::now().time_since_epoch().count()/rand();
+			srand(seed);
+			double randVal = ((double) rand() / (RAND_MAX));
+
+			//mutate with probability = mutation_probability
+			if (mutation_probability > randVal){
+
+				seed = std::chrono::system_clock::now().time_since_epoch().count()/rand();
+				srand(seed);
+				randVal = ((double) rand() / (RAND_MAX));
+
+
+				if (randVal < 0.5){ // a = 0 : add mutation value
+					(pheromone[i])[j] += mutationValue();
+				}
+				else{  // a = 1 : subtract mutation value
+					(pheromone[i])[j] -= mutationValue();
+					if ((pheromone[i])[j] < 0)
+						(pheromone[i])[j] = 0;
+				}
+
+
+
+			}
+		}
+	}
+
+}
+
+
+
+/*Pheromone evaporation*/
+void evaporatePheromone(){
+	long int size = tasks;
+	for (int i = 0; i < size; i++){
+		for (int j = 0; j < size; j++){
+			(pheromone[i])[j] = (1-rho)*(pheromone[i])[j];
+		}
+	}
+
+	//additional evaporation for edges present in current worst solution but not in global best solution
+	for (int i = 0; i < tasks; i++){
+		if (worst_ant.getSequence()[i] != best_ant.getSequence()[i]){
+			(pheromone[i])[ worst_ant.getSequence()[i] ] = (1-rho) * (pheromone[i])[ worst_ant.getSequence()[i] ];
+		}
+	}
+}
+
+/*Update pheromone*/
+void depositPheromone(){
+	best_ant.depositPheromones();
+}
+
+bool stagnation(){
+	int number_of_different_edges = 0;
+	for (int i = 0; i < tasks; i++){
+		if (worst_ant.getSequence()[i] != best_ant.getSequence()[i]){
+			number_of_different_edges++;
+		}
+	}
+	return ((double)number_of_different_edges / (double)tasks) < stagnation_treshold;
+}
+
+/*Check termination condition*/
+bool terminationCondition(){
+	// max_iterations = max_tours / n_ants (integer division)
+	return iterations == max_iterations;
+}
+
+/*Free memory used*/
+void freeMemory(){
+	//delete instance_file;
+	for(int i=0; i < fsp->getNumberOfTasks(); i++){
+		delete[] pheromone[i];
+		delete[] heuristic[i];
+		delete[] probability[i];
+	}
+
+
+	delete[] pheromone;
+	delete[] heuristic;
+	delete[] probability;
+	//delete fsp;
+}
+
+
+int main(int argc, char *argv[] ){
+	if(!readArguments(argc, argv)){
+		exit(1);
+	}
+
+
+	fsp= new FSP(instance_file);
+	machines = fsp->getNumberOfMachines();
+	tasks = fsp -> getNumberOfTasks();
+
+	//int number_of_ants[5] = {2,5,10,20,100};
+	int trials = 1;
+	ofstream boxPlotFile;
+	boxPlotFile.open("boxPlot.txt");
+
+
+	for (int trial = 0; trial < trials; trial++){
+
+		tours = 0;
+		iterations = 0;
+
+		boxPlotFile << trial+1 ;
+
+		best_makespan = LONG_MAX;
+
+		initializePheromone(initial_pheromone);
+		initializeHeuristic();
+		initializeProbability();
+		createColony();
+
+
+		//Iterations loop
+		while(!terminationCondition()){
+
+			worst_makespan = 0;
+			for(int i=0; i< n_ants; i++){
+				colony[i].Search();
+				if(best_makespan > colony[i].getMakespan()){
+					best_makespan = colony[i].getMakespan();
+					best_ant.copyFrom(colony[i]); // ! global best ant
+					mutation_treshold = mutationTreshold();
+
+				}
+				if (worst_makespan < colony[i].getMakespan()){
+					worst_makespan = colony[i].getMakespan();
+					worst_ant.copyFrom(colony[i]); // ! current worst ant
+				}
+				tours++;
+			}
+
+
+			evaporatePheromone();
+			depositPheromone();
+			mutate();
+
+
+
+			if (stagnation()){
+				//cout << "--------------- STAGNATION " << endl;
+				initializePheromone(initial_pheromone);
+				last_restart = iterations;
+			}
+
+			calculateProbability();
+
+			iterations++;
+		}
+
+		boxPlotFile << ":" << best_makespan ;
+		boxPlotFile << endl;
+
+		cout << best_makespan << endl;
+	}
+
+
+	freeMemory();   // Free memory.
+
+
+
+}
+
+
+
+
