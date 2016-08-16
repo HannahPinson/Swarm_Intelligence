@@ -1,0 +1,169 @@
+#include "ant.h"
+
+/* Default constructor*/
+Ant::Ant(){
+	init=false;
+}
+
+/* Constructor*/
+Ant::Ant (FSP* fsp_arg, double ** prob_info, double ** phero){
+	size = fsp_arg->getNumberOfTasks();
+	tasks = fsp_arg->getNumberOfTasks();
+	machines =  fsp_arg->getNumberOfMachines();
+	fsp  = fsp_arg;
+	probability = prob_info;
+	pheromone = phero;
+	sequence = new long int[size];
+	scheduled = new long int[size];
+	makespan = LONG_MAX;
+	init = true;
+}
+
+/* Copy constructor*/
+Ant::Ant (Ant const& other){
+	size = other.size;
+	tasks = other.tasks;
+	machines = other.machines;
+	fsp  = other.fsp;
+	probability = other.probability;
+	pheromone = other.pheromone;
+	sequence = new long int[size];
+	scheduled = new long int[size];
+	for(int i=0; i<size ; i++){
+		sequence[i] = other.sequence[i];
+		scheduled[i] = other.scheduled[i];
+	}
+	makespan = other.makespan;
+	init=true;
+
+}
+
+Ant::~Ant (){
+	if(init){
+		delete[] sequence;
+		delete[] scheduled;
+	}
+	init=false;
+}
+
+bool Ant::alreadyScheduled(long int task, long int currentIndex){
+	for (int i = 0; i < currentIndex; i++ ){
+		if (task == scheduled[i])
+			return true;
+	}
+	return false;
+}
+
+
+
+/*Generate tour using probabilities*/
+void Ant::Search(){
+
+	for (int i = 0; i < tasks; i++){
+		//cout << "considering position " << i << endl;
+		double accul_prob = 0;
+		vector<double> accul_prob_vec;
+		vector<long int> toSelectFrom;
+		// accumulate probabilities of not yet scheduled tasks
+		for (int t = 0; t < tasks; t++){
+			if (!alreadyScheduled(t, i)){
+				toSelectFrom.push_back(t);
+				accul_prob += (probability[i])[t];
+				accul_prob_vec.push_back(accul_prob);
+			}
+		}
+		// renormalize
+		for (int j=0; j < toSelectFrom.size(); j++){
+			accul_prob_vec[j] = accul_prob_vec[j] / accul_prob; //renormalization
+		}
+		// select next task based on probability
+		long int seed = std::chrono::system_clock::now().time_since_epoch().count()/rand();
+		srand(seed);
+		double randVal = ((double) rand() / (RAND_MAX));
+		long int selectedTask;
+		//cout << "number of tasks to choose from: " << toSelectFrom.size() << endl;
+		for (int j=0; j < toSelectFrom.size(); j++){
+			if (accul_prob_vec[j] > randVal){
+				selectedTask = toSelectFrom[j];
+				break;
+			}
+		}
+		sequence[i] = selectedTask;
+		scheduled[i] = selectedTask;
+
+	}
+	ComputeMakespan();
+}
+
+
+double Ant::computeEFT(long int task, long int position, long int machine, double ** earliest_finish_times){
+	double EST; // earliest starting time
+	double precendent_same_machine = 0;
+	double precedent_previous_machine = 0;
+	if (position != 0)
+		precendent_same_machine = (earliest_finish_times[machine])[position-1];
+	if (machine != 0)
+		precedent_previous_machine = (earliest_finish_times[machine-1])[position];
+	if (precendent_same_machine >= precedent_previous_machine){
+		EST = precendent_same_machine;
+	}
+	else
+		EST = precedent_previous_machine;
+	double EFT = EST + fsp->getTime(machine, task);
+	return EFT;
+}
+
+
+
+/*Compute the makespan*/
+void Ant::ComputeMakespan() {
+	double ** earliest_finish_times;
+	earliest_finish_times = new double * [machines];
+	for (int i = 0; i < machines; i++){
+		earliest_finish_times[i] = new double [tasks];
+		//cout << &earliest_finish_times[i] << endl;
+	}
+
+	for (int m = 0; m < machines; m++){
+		for (int p=0; p < tasks; p++){
+			earliest_finish_times[m][p] = computeEFT(sequence[p], p, m, earliest_finish_times);
+		}
+	}
+
+	makespan = earliest_finish_times[machines-1][tasks-1];
+}
+
+
+long int Ant::getMakespan(){
+	return(makespan);
+}
+
+void Ant::depositPheromones(){
+	for (int i = 0; i < size; i++){
+		(pheromone[i])[sequence[i]] += 1./makespan;
+	}
+}
+
+void Ant::copyFrom(Ant &other){
+
+	size = other.size;
+	tasks = other.tasks;
+	machines = other.machines;
+	fsp  = other.fsp;
+	probability = other.probability;
+	pheromone = other.pheromone;
+	sequence = new long int[size];
+	scheduled = new long int[size];
+	for(int i=0; i<size ; i++){
+		sequence[i] = other.sequence[i];
+		scheduled[i] = other.scheduled[i];
+	}
+	makespan = other.makespan;
+	init=true;
+
+
+}
+
+
+
+
