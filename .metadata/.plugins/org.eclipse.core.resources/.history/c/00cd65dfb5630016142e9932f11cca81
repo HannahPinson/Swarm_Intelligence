@@ -1,0 +1,70 @@
+/*
+ * NEH.h
+ *
+ *  Created on: 16 Aug 2016
+ *      Author: Hannah_Pinson
+ */
+
+#ifndef NEH_H_
+#define NEH_H_
+
+#include <vector>
+#include "fsp.h"
+
+
+using namespace std;
+
+struct task_processingTime{
+	double task;
+	double procTime;
+};
+
+vector<task_processingTime> sumProcessingTimes(FSP* fsp){
+	vector<task_processingTime> tasks_procTimes;
+	for(int i = 0; i < fsp->getNumberOfTasks(); i++){
+		double sum = 0;
+		for (int m = 0; m< fsp->getNumberOfMachines(); m++){
+			sum += fsp->getTime(m, i);
+		}
+		task_processingTime tp;
+		tp.task = i;
+		tp.procTime = sum;
+		tasks_procTimes.push_back(tp);
+	}
+}
+
+
+void sortTasks(FSP* fsp){
+	vector<task_processingTime>::iterator it;
+	vector<task_processingTime> unsorted_tasks_pt = sumProcessingTimes(fsp);
+	vector<task_processingTime> sorted_tasks_pt;
+	sorted_tasks_pt.push_back(unsorted_tasks_pt[0]);
+	int inserted = 1;
+	for (int t = 1; t < fsp->getNumberOfTasks; t++){
+		it = sorted_tasks_pt.begin();
+		for (int i = 0; i < inserted; i++){
+			if (unsorted_tasks_pt[t].procTime < sorted_tasks_pt[i].procTime){
+				sorted_tasks_pt.insert(it+i,unsorted_tasks_pt[t]);
+				inserted++;
+				break;
+			}
+		}
+		//if not inserted before an element, add to back
+		sorted_tasks_pt.push_back(unsorted_tasks_pt[t]);
+	}
+
+}
+
+
+void NEH(FSP* fsp){
+
+
+
+
+
+}
+
+
+
+
+#endif /* SRC_NEH_H_ */

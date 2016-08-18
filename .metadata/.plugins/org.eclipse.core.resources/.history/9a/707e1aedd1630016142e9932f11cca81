@@ -1,0 +1,199 @@
+/*
+ * NEH.h
+ *
+ *  Created on: 16 Aug 2016
+ *      Author: Hannah_Pinson
+ */
+
+#ifndef NEH_H_
+#define NEH_H_
+
+#include <vector>
+#include "fsp.h"
+
+
+using namespace std;
+
+struct task_processingTime{
+	double task;
+	double procTime;
+};
+
+struct sequence_makespan{
+	long int * sequence;
+	double makespan;
+};
+
+vector<task_processingTime> sumProcessingTimes(FSP* fsp){
+	vector<task_processingTime> tasks_procTimes;
+	for(int i = 0; i < fsp->getNumberOfTasks(); i++){
+		double sum = 0;
+		for (int m = 0; m< fsp->getNumberOfMachines(); m++){
+			sum += fsp->getTime(m, i);
+		}
+		task_processingTime tp;
+		tp.task = i;
+		tp.procTime = sum;
+		tasks_procTimes.push_back(tp);
+	}
+	return tasks_procTimes;
+}
+
+
+vector<task_processingTime> sortTasks(FSP* fsp){
+	vector<task_processingTime>::iterator it;
+	vector<task_processingTime> unsorted_tasks_pt = sumProcessingTimes(fsp);
+	vector<task_processingTime> sorted_tasks_pt;
+
+	cout << "size: " <<  unsorted_tasks_pt.size() << endl;
+
+	// insertion sort based on total processing time
+	// non-increasing order
+	sorted_tasks_pt.push_back(unsorted_tasks_pt[0]);
+	for (int t = 1; t < fsp->getNumberOfTasks(); t++){
+		it = sorted_tasks_pt.begin();
+		bool inserted = false;
+		for (int i = 0; i < t; i++){
+			if (unsorted_tasks_pt[t].procTime >= sorted_tasks_pt[i].procTime){
+				sorted_tasks_pt.insert(it+i,unsorted_tasks_pt[t]);
+				inserted = true;
+				break;
+			}
+		}
+		//if not inserted before an element, add as last
+		if (!inserted)
+			sorted_tasks_pt.push_back(unsorted_tasks_pt[t]);
+	}
+
+	return sorted_tasks_pt;
+
+}
+
+
+double computeEFT(FSP* fsp, long int task, long int position, long int machine, double ** earliest_finish_times){
+	double EST; // earliest starting time
+	double precendent_same_machine = 0;
+	double precedent_previous_machine = 0;
+	if (position != 0)
+		precendent_same_machine = (earliest_finish_times[machine])[position-1];
+	if (machine != 0)
+		precedent_previous_machine = (earliest_finish_times[machine-1])[position];
+	if (precendent_same_machine >= precedent_previous_machine){
+		EST = precendent_same_machine;
+	}
+	else
+		EST = precedent_previous_machine;
+	double EFT = EST + fsp->getTime(machine, task);
+	return EFT;
+}
+
+double computeMakespan(FSP* fsp, vector<long int> sequence){
+	long int machines = fsp->getNumberOfMachines();
+	long int tasks = fsp->getNumberOfTasks();
+
+	double ** earliest_finish_times;
+	earliest_finish_times = new double * [machines];
+	for (int i = 0; i < machines; i++){
+		earliest_finish_times[i] = new double [tasks];
+	}
+
+	for (int m = 0; m < machines; m++){
+		for (int p=0; p < tasks; p++){
+			earliest_finish_times[m][p] = computeEFT(fsp, sequence[p], p, m, earliest_finish_times);
+		}
+	}
+
+	return earliest_finish_times[machines-1][tasks-1];
+
+}
+
+
+sequence_makespan NEH(FSP* fsp){
+
+	long int tasks = fsp->getNumberOfTasks();
+
+	vector<task_processingTime> sorted_tasks_pt = sortTasks(fsp);
+
+	cout << "sorted tasks: " << endl;
+	for (int i = 0; i < tasks; i++){
+		cout << sorted_tasks_pt[i].task << endl;
+	}
+
+
+
+	vector<long int> seq_so_far;
+
+	// place the first two tasks such that the partial makespan is minimized
+	vector<long int> seq1;
+	vector<long int> seq2;
+	seq1.push_back(sorted_tasks_pt[0].task);
+	seq1.push_back(sorted_tasks_pt[1].task);
+	seq2.push_back(sorted_tasks_pt[1].task);
+	seq2.push_back(sorted_tasks_pt[0].task);
+
+	cout << "intial sequence construction..." << endl;
+
+	if(computeMakespan(fsp, seq1) > computeMakespan(fsp, seq2)){
+		seq_so_far = seq2;
+	}
+	else
+		seq_so_far = seq1;
+
+	cout << "constructed." << endl;
+
+	double minimal_makespan = LONG_MAX;
+	double minimizing_position = -1;
+	for (int k = 2; k < sorted_tasks_pt.size(); k++){
+		cout << "------------ sequence so far:" << endl;
+		for (int j = 0; j < seq_so_far.size(); j++){
+			cout << seq_so_far[j] << endl;
+		}
+
+
+		long int current_task = sorted_tasks_pt[k].task;
+		// determine minimal makespan amongst the k possible positions before an element
+		for (int position = 0; position < k; position++){
+			vector<long int>::iterator it = seq_so_far.begin() + position;
+			seq_so_far.insert(it, current_task);
+			if( computeMakespan(fsp, seq_so_far) < minimal_makespan ){
+				minimizing_position = position;
+				minimal_makespan = computeMakespan(fsp, seq_so_far);
+			}
+
+			seq_so_far.erase(it);
+		}
+		// determine makespan of position = last
+		seq_so_far.push_back(current_task);
+		// insert task at position that minimizes the partial makespan (possibly last)
+		if (! (computeMakespan(fsp, seq_so_far) < minimal_makespan)){
+			seq_so_far.pop_back();
+			vector<long int>::iterator it = seq_so_far.begin() + minimizing_position;
+			seq_so_far.insert(it, current_task);
+		}
+		else //positioned last
+			minimal_makespan = computeMakespan(fsp, seq_so_far);
+
+	}
+
+
+	long int * sequence = new long int[tasks];
+	for (int i = 0; i < tasks; i++){
+		sequence[i] = seq_so_far[i];
+	}
+
+	sequence_makespan seq_mkspan;
+	seq_mkspan.sequence = sequence;
+	seq_mkspan.makespan = minimal_makespan;
+
+	return seq_mkspan;
+
+
+
+
+
+}
+
+
+
+
+#endif /* SRC_NEH_H_ */

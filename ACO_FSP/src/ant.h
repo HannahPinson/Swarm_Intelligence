@@ -45,8 +45,11 @@ class Ant{
        Ant(Ant const &other);
 
        void Search(long int seed);
+       void searchMMAS(long int * best_sol_so_far, long int seed);
        long int getMakespan();
        long int * getSequence(){return sequence;};
+       void setSequence(long int * seq){sequence = seq;};
+       void setMakespan(long int mp){makespan = mp;};
 
        bool alreadyScheduled(long int task, long int currentIndex);
        void depositPheromones();

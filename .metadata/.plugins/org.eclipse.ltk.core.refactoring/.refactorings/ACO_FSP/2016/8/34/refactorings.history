@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename resource &apos;ACO_FSP/src/NEH&apos; to &apos;NEH.h&apos;" description="Rename resource &apos;NEH&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="src/NEH" name="NEH.h" stamp="1471346791362" updateReferences="true"/>
+</session>

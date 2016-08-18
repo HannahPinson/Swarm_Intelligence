@@ -1,3 +1,32 @@
-11:19:33 **** Incremental Build of configuration Debug for project ACO_FSP ****
+10:56:03 **** Incremental Build of configuration Debug for project ACO_FSP ****
+make all 
+Building file: ../src/aco.cpp
+Invoking: GCC C++ Compiler
+g++ -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"src/aco.d" -MT"src/aco.o" -o "src/aco.o" "../src/aco.cpp"
+In file included from ../src/aco.cpp:3:
+../src/NEH.h:132:11: warning: unused variable 'tasks' [-Wunused-variable]
+        long int tasks = fsp->getNumberOfTasks();
+                 ^
+../src/aco.cpp:264:1: warning: control reaches end of non-void function [-Wreturn-type]
+}
+^
+2 warnings generated.
+Finished building: ../src/aco.cpp
+ 
+Building target: ACO_FSP
+Invoking: MacOS X C++ Linker
+g++  -o "ACO_FSP"  ./src/aco.o ./src/ant.o ./src/fsp.o ./src/utils.o   
+Finished building target: ACO_FSP
+ 
+10:56:06 **** Incremental Build of configuration Debug for project ACO_FSP ****
+make all 
+make: Nothing to be done for `all'.
+10:57:16 **** Incremental Build of configuration Debug for project ACO_FSP ****
+make all 
+make: Nothing to be done for `all'.
+10:57:17 **** Incremental Build of configuration Debug for project ACO_FSP ****
+make all 
+make: Nothing to be done for `all'.
+10:57:18 **** Incremental Build of configuration Debug for project ACO_FSP ****
 make all 
 make: Nothing to be done for `all'.

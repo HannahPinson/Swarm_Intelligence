@@ -60,10 +60,11 @@ bool Ant::alreadyScheduled(long int task, long int currentIndex){
 void Ant::Search(long int seed){
 
 	for (int i = 0; i < tasks; i++){
-		//cout << "considering position " << i << endl;
+
 		double accul_prob = 0;
 		vector<double> accul_prob_vec;
 		vector<long int> toSelectFrom;
+
 		// accumulate probabilities of not yet scheduled tasks
 		for (int t = 0; t < tasks; t++){
 			if (!alreadyScheduled(t, i)){
@@ -76,13 +77,9 @@ void Ant::Search(long int seed){
 		for (int j=0; j < toSelectFrom.size(); j++){
 			accul_prob_vec[j] = accul_prob_vec[j] / accul_prob; //renormalization
 		}
-		// select next task based on probability
-		/*long int seed = std::chrono::system_clock::now().time_since_epoch().count()/rand();
-		srand(seed);
-		double randVal = ((double) rand() / (RAND_MAX));*/
+
 		double randVal = ran01(&seed);
 		long int selectedTask;
-		//cout << "number of tasks to choose from: " << toSelectFrom.size() << endl;
 		for (int j=0; j < toSelectFrom.size(); j++){
 			if (accul_prob_vec[j] > randVal){
 				selectedTask = toSelectFrom[j];
@@ -93,8 +90,150 @@ void Ant::Search(long int seed){
 		scheduled[i] = selectedTask;
 
 	}
+
 	ComputeMakespan();
 }
+
+
+void Ant::searchMMAS(long int * best_sol_so_far, long int seed){
+
+	for (int i = 0; i < tasks; i++){
+
+		//cout << "considering position " << i << endl;
+
+
+		//collect 5 first unscheduled tasks in best solution so far
+		// (or less if less than 5 remaining)
+		int collected = 0;
+		vector<long int> toSelectFrom;
+		for (int t = 0; t < tasks; t++){
+			long int task = best_sol_so_far[t];
+			if (!alreadyScheduled(task, i)){
+				toSelectFrom.push_back(task);
+				collected++;
+				if (collected == 5)
+					break;
+			}
+		}
+
+		/*cout << "collected tasks " << endl;
+
+		for (int j = 0; j < toSelectFrom.size(); j++){
+			cout << toSelectFrom[j] << " ";
+		}
+
+		cout << endl;*/
+
+
+		long int selectedTask;
+		double randVal = ran01(&seed);
+
+
+
+		//select a task:
+
+		// pick task with highest pheromones
+		if (randVal <= (double)(tasks-4)/(double)tasks){
+			double largest_value = 0;
+			for (int t = 0; t < toSelectFrom.size(); t++){
+				long int task = toSelectFrom[t];
+				if ((pheromone[task])[i] > largest_value){
+					selectedTask = task;
+					largest_value = (pheromone[task])[i];
+				}
+			}
+		}
+
+		// pick task according to probability distribution
+		else {
+			/*if (toSelectFrom.size() > 5){
+				//collect five best tasks
+				vector<long int> top5;
+				long int next_best_task;
+				int next_best_task_index = 0;
+				for (int j = 0; j < 5; j++){
+					double largest_value = 0;
+					for (int s = 0; s < toSelectFrom.size(); s++){
+						long int task = toSelectFrom[s];
+						if ( ((pheromone[task])[i] > largest_value)) {
+							next_best_task = task;
+							largest_value = (pheromone[task])[i];
+							next_best_task_index = s;
+						}
+					}
+					vector<long int>::iterator it = toSelectFrom.begin() + next_best_task_index;
+					toSelectFrom.erase(it);
+					top5.push_back(next_best_task);
+				}*/
+
+			// pick among 5 best according to probability distribution
+			double accul_prob = 0;
+			vector<double> accul_prob_vec;
+			for (int t = 0; t < toSelectFrom.size(); t++){
+				long int task = toSelectFrom[t];
+				accul_prob += (probability[task])[i];
+				accul_prob_vec.push_back(accul_prob);
+			}
+			// renormalize
+			for (int j=0; j < toSelectFrom.size() ; j++){
+				accul_prob_vec[j] = accul_prob_vec[j] / accul_prob; //renormalization
+			}
+
+			//cout << "prob vec " << endl;
+
+			/*for (int j = 0; j < accul_prob_vec.size(); j++){
+				cout << accul_prob_vec[j] << " ";
+			}*/
+
+
+			double randVal = ran01(&seed);
+			for (int j=0; j < toSelectFrom.size(); j++){
+				if (accul_prob_vec[j] > randVal){
+					selectedTask = toSelectFrom[j];
+					break;
+				}
+			}
+		}
+
+		//cout << "selectedTask " << selectedTask << endl;
+
+		sequence[i] = selectedTask;
+		scheduled[i] = selectedTask;
+		/*else{ // 5 or less tasks remaining
+
+				double accul_prob = 0;
+				vector<double> accul_prob_vec;
+				int size = toSelectFrom.size();
+				for (int t = 0; t < size; t++){
+					long int task = toSelectFrom[t];
+					accul_prob += (probability[task])[i];
+					accul_prob_vec.push_back(accul_prob);
+				}
+				// renormalize
+				for (int j=0; j < size ; j++){
+					accul_prob_vec[j] = accul_prob_vec[j] / accul_prob; //renormalization
+				}
+
+				double randVal = ran01(&seed);
+				long int selectedTask;
+				for (int j=0; j < size; j++){
+					if (accul_prob_vec[j] > randVal){
+						selectedTask = toSelectFrom[j];
+						break;
+					}
+				}
+			}*/
+
+	}
+
+
+
+	ComputeMakespan();
+
+}
+
+
+
 
 
 double Ant::computeEFT(long int task, long int position, long int machine, double ** earliest_finish_times){

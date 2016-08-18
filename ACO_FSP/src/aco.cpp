@@ -1,5 +1,6 @@
 
 #include "aco.h"
+#include "NEH.h"
 
 
 using namespace std;
@@ -25,16 +26,28 @@ long int seed = -1;
 
 
 vector<Ant> colony;
-Ant best_ant;
-Ant worst_ant;
-long int best_makespan=LONG_MAX;     /* length of the shortest makespan found */
-long int worst_makespan = 0;
+Ant global_best_ant;
+Ant iteration_best_ant;
+Ant iteration_worst_ant;
+long int global_best_makespan=LONG_MAX;     /* length of the shortest makespan found */
+long int iteration_best_makespan = LONG_MAX;
+long int iteration_worst_makespan = 0;
 
 long int machines;
 long int tasks;
 
-// best ant worst ant variables
+
+string algo; //type of algorithm
 double stagnation_treshold;
+
+// Max Min Ant System variables
+double lower_limit;
+double upper_limit;
+double a = 1.5; //  lower limit = upper limit / a
+
+
+
+// Best Ant Worst Ant variables
 double mutation_treshold;
 double last_restart = 0;
 double mutation_probability;
@@ -45,8 +58,8 @@ void setDefaultParameters(){
 	alpha=1;
 	beta=1;
 	rho=0.1;
-	n_ants=1;
-	max_tours=1;
+	n_ants=5;
+	max_tours=50;
 	max_iterations= max_tours / n_ants;
 	instance_file="";
 	seed = (long int) time(NULL);
@@ -54,6 +67,10 @@ void setDefaultParameters(){
 	stagnation_treshold = 0.20;
 	mutation_probability = 0.10;
 	sigma = 4;
+
+	algo = "bawa"; //set Best Ant Worst Ant as default algorithm
+	initial_pheromone = 1;
+
 }
 
 /*Print default parameters*/
@@ -111,6 +128,10 @@ bool readArguments(int argc, char *argv[] ){
 			mutation_probability = atol(argv[i+1]);
 			i++;
 		}
+		else if(strcmp(argv[i], "--algo") == 0) {
+			algo = argv[i+1];
+			i++;
+		}
 		else{
 			cout << "Parameter " << argv[i] << "no recognized.\n";
 			return(false);
@@ -120,7 +141,12 @@ bool readArguments(int argc, char *argv[] ){
 		cout << "No instance file provided.\n";
 		return(false);
 	}
+	if( (algo!="bawa") && (algo!="mmas") ){
+		cout << "Algorithm not recognized. Try bawa or mmas. \n";
+		return(false);
+	}
 	//printParameters();
+	max_iterations= max_tours / n_ants;
 	return(true);
 }
 
@@ -197,7 +223,7 @@ void initializeProbability(){
 double mutationTreshold(){
 	double sum = 0;
 	for (int i = 0; i < tasks; i++){
-		sum += (pheromone[i])[best_ant.getSequence()[i]];
+		sum += (pheromone[i])[global_best_ant.getSequence()[i]];
 	}
 	return (double) sum / (double) tasks;
 }
@@ -232,16 +258,30 @@ double mutate(){
 					if ((pheromone[i])[j] < 0)
 						(pheromone[i])[j] = 0;
 				}
-
-
-
 			}
 		}
 	}
+}
+
+void setLimits(){
+	upper_limit = 1/(rho * global_best_makespan);
+	lower_limit = upper_limit / a;
 
 }
 
 
+//bring all pheromone values within range [lower_limit, upper_limit]
+void bound(){
+	setLimits();
+	for (int i = 0; i < tasks; i++){
+		for (int j = 0; j < tasks; j++){
+			if( (pheromone[i])[j] < lower_limit)
+				(pheromone[i])[j] = lower_limit;
+			if ( (pheromone[i])[j] > upper_limit )
+				(pheromone[i])[j] = upper_limit;
+		}
+	}
+}
 
 /*Pheromone evaporation*/
 void evaporatePheromone(){
@@ -253,22 +293,29 @@ void evaporatePheromone(){
 	}
 
 	//additional evaporation for edges present in current worst solution but not in global best solution
-	for (int i = 0; i < tasks; i++){
-		if (worst_ant.getSequence()[i] != best_ant.getSequence()[i]){
-			(pheromone[i])[ worst_ant.getSequence()[i] ] = (1-rho) * (pheromone[i])[ worst_ant.getSequence()[i] ];
+	if (algo == "bawa" ){
+		for (int i = 0; i < tasks; i++){
+			if (iteration_worst_ant.getSequence()[i] != global_best_ant.getSequence()[i]){
+				(pheromone[i])[ iteration_worst_ant.getSequence()[i] ] = (1-rho) * (pheromone[i])[iteration_worst_ant.getSequence()[i] ];
+			}
 		}
 	}
 }
 
 /*Update pheromone*/
 void depositPheromone(){
-	best_ant.depositPheromones();
+	// for MMAS, best ant is the iteration best ant
+	// for BAWA, best ant is the global best ant
+	if(algo =="mmas")
+		iteration_best_ant.depositPheromones();
+	if (algo=="bawa")
+		global_best_ant.depositPheromones();
 }
 
 bool stagnation(){
 	int number_of_different_edges = 0;
 	for (int i = 0; i < tasks; i++){
-		if (worst_ant.getSequence()[i] != best_ant.getSequence()[i]){
+		if (iteration_worst_ant.getSequence()[i] != iteration_best_ant.getSequence()[i]){
 			number_of_different_edges++;
 		}
 	}
@@ -277,13 +324,11 @@ bool stagnation(){
 
 /*Check termination condition*/
 bool terminationCondition(){
-	// max_iterations = max_tours / n_ants (integer division)
 	return iterations == max_iterations;
 }
 
 /*Free memory used*/
 void freeMemory(){
-	//delete instance_file;
 	for(int i=0; i < fsp->getNumberOfTasks(); i++){
 		delete[] pheromone[i];
 		delete[] heuristic[i];
@@ -308,10 +353,10 @@ int main(int argc, char *argv[] ){
 	machines = fsp->getNumberOfMachines();
 	tasks = fsp -> getNumberOfTasks();
 
-	//int number_of_ants[5] = {2,5,10,20,100};
 	int trials = 1;
 	ofstream boxPlotFile;
 	boxPlotFile.open("boxPlot.txt");
+
 
 
 	for (int trial = 0; trial < trials; trial++){
@@ -321,7 +366,23 @@ int main(int argc, char *argv[] ){
 
 		boxPlotFile << trial+1 ;
 
-		best_makespan = LONG_MAX;
+		global_best_makespan = LONG_MAX;
+
+		//initialisation
+		if (algo == "mmas"){
+			sequence_makespan seedSequenceVec = NEH(fsp);
+			long int* NEH_seq = new long int [tasks];
+			for (int i = 0; i < tasks; i++ ){
+				NEH_seq[i] = seedSequenceVec.sequence[i];
+			}
+			global_best_ant = Ant();
+			global_best_ant.setSequence(NEH_seq);
+			global_best_ant.setMakespan(seedSequenceVec.makespan);
+			global_best_makespan = seedSequenceVec.makespan;
+			upper_limit = 1/(rho * seedSequenceVec.makespan);
+			lower_limit = upper_limit / a;
+			initial_pheromone = upper_limit;
+		}
 
 		initializePheromone(initial_pheromone);
 		initializeHeuristic();
@@ -329,21 +390,42 @@ int main(int argc, char *argv[] ){
 		createColony();
 
 
+
+
+
 		//Iterations loop
 		while(!terminationCondition()){
 
-			worst_makespan = 0;
+			iteration_worst_makespan = 0;
+			iteration_best_makespan = LONG_MAX;
+
+
+
 			for(int i=0; i< n_ants; i++){
-				colony[i].Search(seed);
-				if(best_makespan > colony[i].getMakespan()){
-					best_makespan = colony[i].getMakespan();
-					best_ant.copyFrom(colony[i]); // ! global best ant
+
+				if (algo == "bawa")
+					colony[i].Search(seed);
+				if (algo == "mmas")
+					colony[i].searchMMAS(global_best_ant.getSequence(), seed);
+
+
+
+
+				if(global_best_makespan > colony[i].getMakespan()){
+					global_best_makespan = colony[i].getMakespan();
+					global_best_ant.copyFrom(colony[i]);
 					mutation_treshold = mutationTreshold();
 
 				}
-				if (worst_makespan < colony[i].getMakespan()){
-					worst_makespan = colony[i].getMakespan();
-					worst_ant.copyFrom(colony[i]); // ! current worst ant
+				if(iteration_best_makespan > colony[i].getMakespan()){
+					iteration_best_makespan = colony[i].getMakespan();
+					iteration_best_ant.copyFrom(colony[i]);
+					mutation_treshold = mutationTreshold();
+
+				}
+				if (iteration_worst_makespan < colony[i].getMakespan()){
+					iteration_worst_makespan = colony[i].getMakespan();
+					iteration_worst_ant.copyFrom(colony[i]);
 				}
 				tours++;
 			}
@@ -351,25 +433,28 @@ int main(int argc, char *argv[] ){
 
 			evaporatePheromone();
 			depositPheromone();
-			mutate();
 
+			if(algo=="bawa")
+				mutate();
+			if(algo == "mmas"){
+				setLimits();
+				bound();
+			}
 
 
 			if (stagnation()){
-				//cout << "--------------- STAGNATION " << endl;
 				initializePheromone(initial_pheromone);
 				last_restart = iterations;
 			}
 
 			calculateProbability();
-
 			iterations++;
 		}
 
-		boxPlotFile << ":" << best_makespan ;
+		boxPlotFile << ":" << global_best_makespan ;
 		boxPlotFile << endl;
 
-		cout << best_makespan << endl;
+		cout << global_best_ant.getMakespan() << endl;
 	}
 
 
