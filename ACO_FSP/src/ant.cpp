@@ -57,7 +57,10 @@ bool Ant::alreadyScheduled(long int task, long int currentIndex){
 
 
 /*Generate tour using probabilities*/
-void Ant::Search(long int seed){
+void Ant::Search(long int seed, double beta, double ** heuristic){
+
+
+	long int previous_job = -1;
 
 	for (int i = 0; i < tasks; i++){
 
@@ -69,7 +72,10 @@ void Ant::Search(long int seed){
 		for (int t = 0; t < tasks; t++){
 			if (!alreadyScheduled(t, i)){
 				toSelectFrom.push_back(t);
-				accul_prob += (probability[i])[t];
+				if (previous_job != -1)
+					accul_prob += (probability[i])[t] * pow((heuristic[previous_job])[t], beta);
+				else
+					accul_prob += (probability[i])[t];
 				accul_prob_vec.push_back(accul_prob);
 			}
 		}
@@ -78,7 +84,9 @@ void Ant::Search(long int seed){
 			accul_prob_vec[j] = accul_prob_vec[j] / accul_prob; //renormalization
 		}
 
-		double randVal = ran01(&seed);
+		double randVal = ((double) rand() / (RAND_MAX));
+		srand(randVal * 10000000000);
+		//double randVal = ran01(&seed);
 		long int selectedTask;
 		for (int j=0; j < toSelectFrom.size(); j++){
 			if (accul_prob_vec[j] > randVal){
@@ -88,6 +96,7 @@ void Ant::Search(long int seed){
 		}
 		sequence[i] = selectedTask;
 		scheduled[i] = selectedTask;
+		previous_job = selectedTask;
 
 	}
 
@@ -95,11 +104,11 @@ void Ant::Search(long int seed){
 }
 
 
-void Ant::searchMMAS(long int * best_sol_so_far, long int seed){
+void Ant::searchMMAS(long int * best_sol_so_far, long int seed, double beta, double ** heuristic){
+
+	long int previous_job = -1;
 
 	for (int i = 0; i < tasks; i++){
-
-		//cout << "considering position " << i << endl;
 
 
 		//collect 5 first unscheduled tasks in best solution so far
@@ -116,62 +125,45 @@ void Ant::searchMMAS(long int * best_sol_so_far, long int seed){
 			}
 		}
 
-		/*cout << "collected tasks " << endl;
-
-		for (int j = 0; j < toSelectFrom.size(); j++){
-			cout << toSelectFrom[j] << " ";
-		}
-
-		cout << endl;*/
-
 
 		long int selectedTask;
-		double randVal = ran01(&seed);
-
-
+		double randVal = ((double) rand() / (RAND_MAX));
+		srand(randVal * 10000000000);
+		//double randVal = ran01(&seed);
 
 		//select a task:
 
-		// pick task with highest pheromones
+
+		// pick task with highest probability
 		if (randVal <= (double)(tasks-4)/(double)tasks){
 			double largest_value = 0;
 			for (int t = 0; t < toSelectFrom.size(); t++){
 				long int task = toSelectFrom[t];
-				if ((pheromone[task])[i] > largest_value){
+				double prob;
+				if (previous_job != -1)
+					prob = (probability[i])[task] * pow((heuristic[previous_job])[task], beta);
+				else
+					prob = (probability[i])[task];
+
+				if (prob > largest_value){
 					selectedTask = task;
-					largest_value = (pheromone[task])[i];
+					largest_value = prob;
 				}
 			}
 		}
 
 		// pick task according to probability distribution
 		else {
-			/*if (toSelectFrom.size() > 5){
-				//collect five best tasks
-				vector<long int> top5;
-				long int next_best_task;
-				int next_best_task_index = 0;
-				for (int j = 0; j < 5; j++){
-					double largest_value = 0;
-					for (int s = 0; s < toSelectFrom.size(); s++){
-						long int task = toSelectFrom[s];
-						if ( ((pheromone[task])[i] > largest_value)) {
-							next_best_task = task;
-							largest_value = (pheromone[task])[i];
-							next_best_task_index = s;
-						}
-					}
-					vector<long int>::iterator it = toSelectFrom.begin() + next_best_task_index;
-					toSelectFrom.erase(it);
-					top5.push_back(next_best_task);
-				}*/
 
 			// pick among 5 best according to probability distribution
 			double accul_prob = 0;
 			vector<double> accul_prob_vec;
 			for (int t = 0; t < toSelectFrom.size(); t++){
 				long int task = toSelectFrom[t];
-				accul_prob += (probability[task])[i];
+				if (previous_job != -1)
+					accul_prob += (probability[i])[task] * pow((heuristic[previous_job])[task], beta);
+				else
+					accul_prob += (probability[i])[task];
 				accul_prob_vec.push_back(accul_prob);
 			}
 			// renormalize
@@ -179,14 +171,10 @@ void Ant::searchMMAS(long int * best_sol_so_far, long int seed){
 				accul_prob_vec[j] = accul_prob_vec[j] / accul_prob; //renormalization
 			}
 
-			//cout << "prob vec " << endl;
-
-			/*for (int j = 0; j < accul_prob_vec.size(); j++){
-				cout << accul_prob_vec[j] << " ";
-			}*/
-
-
-			double randVal = ran01(&seed);
+			double randVal = ((double) rand() / (RAND_MAX));
+			srand(randVal * 10000000000);
+			randVal = ((double) rand() / (RAND_MAX));
+			//double randVal = ran01(&seed);
 			for (int j=0; j < toSelectFrom.size(); j++){
 				if (accul_prob_vec[j] > randVal){
 					selectedTask = toSelectFrom[j];
@@ -195,38 +183,10 @@ void Ant::searchMMAS(long int * best_sol_so_far, long int seed){
 			}
 		}
 
-		//cout << "selectedTask " << selectedTask << endl;
-
 		sequence[i] = selectedTask;
 		scheduled[i] = selectedTask;
-		/*else{ // 5 or less tasks remaining
-
-				double accul_prob = 0;
-				vector<double> accul_prob_vec;
-				int size = toSelectFrom.size();
-				for (int t = 0; t < size; t++){
-					long int task = toSelectFrom[t];
-					accul_prob += (probability[task])[i];
-					accul_prob_vec.push_back(accul_prob);
-				}
-				// renormalize
-				for (int j=0; j < size ; j++){
-					accul_prob_vec[j] = accul_prob_vec[j] / accul_prob; //renormalization
-				}
-
-				double randVal = ran01(&seed);
-				long int selectedTask;
-				for (int j=0; j < size; j++){
-					if (accul_prob_vec[j] > randVal){
-						selectedTask = toSelectFrom[j];
-						break;
-					}
-				}
-			}*/
-
+		previous_job = selectedTask;
 	}
-
-
 
 	ComputeMakespan();
 

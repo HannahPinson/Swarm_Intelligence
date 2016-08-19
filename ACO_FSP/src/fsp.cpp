@@ -44,3 +44,14 @@ FSP::~FSP(){
 	/*free(times);
 	times = NULL;*/
 }
+
+
+long int FSP::getDistance(long int task1, long int task2){
+	long int distance = 0;
+	distance += getTime(1, task1);
+	for (int j = 1; j < m; j++){
+		distance += (m-(j+1)) * abs(getTime(j, task1) - getTime(j-1, task2));
+	}
+	distance += getTime(m-1, task2);
+	return distance;
+}

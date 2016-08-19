@@ -1,4 +1,306 @@
-10:56:03 **** Incremental Build of configuration Debug for project ACO_FSP ****
+10:16:55 **** Incremental Build of configuration Debug for project ACO_FSP ****
+make all 
+Building file: ../src/ant.cpp
+Invoking: GCC C++ Compiler
+g++ -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"src/ant.d" -MT"src/ant.o" -o "src/ant.o" "../src/ant.cpp"
+../src/ant.cpp:91:17: warning: variable 'selectedTask' is used uninitialized whenever 'for' loop exits because its condition is false [-Wsometimes-uninitialized]
+                for (int j=0; j < toSelectFrom.size(); j++){
+                              ^~~~~~~~~~~~~~~~~~~~~~~
+../src/ant.cpp:97:17: note: uninitialized use occurs here
+                sequence[i] = selectedTask;
+                              ^~~~~~~~~~~~
+../src/ant.cpp:91:17: note: remove the condition if it is always true
+                for (int j=0; j < toSelectFrom.size(); j++){
+                              ^~~~~~~~~~~~~~~~~~~~~~~
+../src/ant.cpp:90:24: note: initialize the variable 'selectedTask' to silence this warning
+                long int selectedTask;
+                                     ^
+                                      = 0
+../src/ant.cpp:176:11: error: redefinition of 'randVal'
+                        double randVal = ((double) rand() / (RAND_MAX));
+                               ^
+../src/ant.cpp:174:11: note: previous definition is here
+                        double randVal = ((double) rand() / (RAND_MAX));
+                               ^
+1 warning and 1 error generated.
+make: *** [src/ant.o] Error 1
+10:17:05 **** Incremental Build of configuration Debug for project ACO_FSP ****
+make all 
+Building file: ../src/ant.cpp
+Invoking: GCC C++ Compiler
+g++ -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"src/ant.d" -MT"src/ant.o" -o "src/ant.o" "../src/ant.cpp"
+../src/ant.cpp:91:17: warning: variable 'selectedTask' is used uninitialized whenever 'for' loop exits because its condition is false [-Wsometimes-uninitialized]
+                for (int j=0; j < toSelectFrom.size(); j++){
+                              ^~~~~~~~~~~~~~~~~~~~~~~
+../src/ant.cpp:97:17: note: uninitialized use occurs here
+                sequence[i] = selectedTask;
+                              ^~~~~~~~~~~~
+../src/ant.cpp:91:17: note: remove the condition if it is always true
+                for (int j=0; j < toSelectFrom.size(); j++){
+                              ^~~~~~~~~~~~~~~~~~~~~~~
+../src/ant.cpp:90:24: note: initialize the variable 'selectedTask' to silence this warning
+                long int selectedTask;
+                                     ^
+                                      = 0
+../src/ant.cpp:180:18: warning: variable 'selectedTask' is used uninitialized whenever 'for' loop exits because its condition is false [-Wsometimes-uninitialized]
+                        for (int j=0; j < toSelectFrom.size(); j++){
+                                      ^~~~~~~~~~~~~~~~~~~~~~~
+../src/ant.cpp:188:17: note: uninitialized use occurs here
+                sequence[i] = selectedTask;
+                              ^~~~~~~~~~~~
+../src/ant.cpp:180:18: note: remove the condition if it is always true
+                        for (int j=0; j < toSelectFrom.size(); j++){
+                                      ^~~~~~~~~~~~~~~~~~~~~~~
+../src/ant.cpp:129:24: note: initialize the variable 'selectedTask' to silence this warning
+                long int selectedTask;
+                                     ^
+                                      = 0
+2 warnings generated.
+Finished building: ../src/ant.cpp
+ 
+Building target: ACO_FSP
+Invoking: MacOS X C++ Linker
+g++  -o "ACO_FSP"  ./src/aco.o ./src/ant.o ./src/fsp.o ./src/utils.o   
+Finished building target: ACO_FSP
+ 
+10:17:53 **** Incremental Build of configuration Debug for project ACO_FSP ****
+make all 
+Building file: ../src/ant.cpp
+Invoking: GCC C++ Compiler
+g++ -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"src/ant.d" -MT"src/ant.o" -o "src/ant.o" "../src/ant.cpp"
+../src/ant.cpp:91:17: warning: variable 'selectedTask' is used uninitialized whenever 'for' loop exits because its condition is false [-Wsometimes-uninitialized]
+                for (int j=0; j < toSelectFrom.size(); j++){
+                              ^~~~~~~~~~~~~~~~~~~~~~~
+../src/ant.cpp:97:17: note: uninitialized use occurs here
+                sequence[i] = selectedTask;
+                              ^~~~~~~~~~~~
+../src/ant.cpp:91:17: note: remove the condition if it is always true
+                for (int j=0; j < toSelectFrom.size(); j++){
+                              ^~~~~~~~~~~~~~~~~~~~~~~
+../src/ant.cpp:90:24: note: initialize the variable 'selectedTask' to silence this warning
+                long int selectedTask;
+                                     ^
+                                      = 0
+../src/ant.cpp:181:18: warning: variable 'selectedTask' is used uninitialized whenever 'for' loop exits because its condition is false [-Wsometimes-uninitialized]
+                        for (int j=0; j < toSelectFrom.size(); j++){
+                                      ^~~~~~~~~~~~~~~~~~~~~~~
+../src/ant.cpp:189:17: note: uninitialized use occurs here
+                sequence[i] = selectedTask;
+                              ^~~~~~~~~~~~
+../src/ant.cpp:181:18: note: remove the condition if it is always true
+                        for (int j=0; j < toSelectFrom.size(); j++){
+                                      ^~~~~~~~~~~~~~~~~~~~~~~
+../src/ant.cpp:129:24: note: initialize the variable 'selectedTask' to silence this warning
+                long int selectedTask;
+                                     ^
+                                      = 0
+2 warnings generated.
+Finished building: ../src/ant.cpp
+ 
+Building target: ACO_FSP
+Invoking: MacOS X C++ Linker
+g++  -o "ACO_FSP"  ./src/aco.o ./src/ant.o ./src/fsp.o ./src/utils.o   
+Finished building target: ACO_FSP
+ 
+10:18:08 **** Incremental Build of configuration Debug for project ACO_FSP ****
+make all 
+Building file: ../src/ant.cpp
+Invoking: GCC C++ Compiler
+g++ -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"src/ant.d" -MT"src/ant.o" -o "src/ant.o" "../src/ant.cpp"
+../src/ant.cpp:91:17: warning: variable 'selectedTask' is used uninitialized whenever 'for' loop exits because its condition is false [-Wsometimes-uninitialized]
+                for (int j=0; j < toSelectFrom.size(); j++){
+                              ^~~~~~~~~~~~~~~~~~~~~~~
+../src/ant.cpp:97:17: note: uninitialized use occurs here
+                sequence[i] = selectedTask;
+                              ^~~~~~~~~~~~
+../src/ant.cpp:91:17: note: remove the condition if it is always true
+                for (int j=0; j < toSelectFrom.size(); j++){
+                              ^~~~~~~~~~~~~~~~~~~~~~~
+../src/ant.cpp:90:24: note: initialize the variable 'selectedTask' to silence this warning
+                long int selectedTask;
+                                     ^
+                                      = 0
+../src/ant.cpp:181:18: warning: variable 'selectedTask' is used uninitialized whenever 'for' loop exits because its condition is false [-Wsometimes-uninitialized]
+                        for (int j=0; j < toSelectFrom.size(); j++){
+                                      ^~~~~~~~~~~~~~~~~~~~~~~
+../src/ant.cpp:189:17: note: uninitialized use occurs here
+                sequence[i] = selectedTask;
+                              ^~~~~~~~~~~~
+../src/ant.cpp:181:18: note: remove the condition if it is always true
+                        for (int j=0; j < toSelectFrom.size(); j++){
+                                      ^~~~~~~~~~~~~~~~~~~~~~~
+../src/ant.cpp:129:24: note: initialize the variable 'selectedTask' to silence this warning
+                long int selectedTask;
+                                     ^
+                                      = 0
+2 warnings generated.
+Finished building: ../src/ant.cpp
+ 
+Building target: ACO_FSP
+Invoking: MacOS X C++ Linker
+g++  -o "ACO_FSP"  ./src/aco.o ./src/ant.o ./src/fsp.o ./src/utils.o   
+Finished building target: ACO_FSP
+ 
+10:19:48 **** Incremental Build of configuration Debug for project ACO_FSP ****
+make all 
+Building file: ../src/ant.cpp
+Invoking: GCC C++ Compiler
+g++ -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"src/ant.d" -MT"src/ant.o" -o "src/ant.o" "../src/ant.cpp"
+../src/ant.cpp:91:17: warning: variable 'selectedTask' is used uninitialized whenever 'for' loop exits because its condition is false [-Wsometimes-uninitialized]
+                for (int j=0; j < toSelectFrom.size(); j++){
+                              ^~~~~~~~~~~~~~~~~~~~~~~
+../src/ant.cpp:97:17: note: uninitialized use occurs here
+                sequence[i] = selectedTask;
+                              ^~~~~~~~~~~~
+../src/ant.cpp:91:17: note: remove the condition if it is always true
+                for (int j=0; j < toSelectFrom.size(); j++){
+                              ^~~~~~~~~~~~~~~~~~~~~~~
+../src/ant.cpp:90:24: note: initialize the variable 'selectedTask' to silence this warning
+                long int selectedTask;
+                                     ^
+                                      = 0
+../src/ant.cpp:181:18: warning: variable 'selectedTask' is used uninitialized whenever 'for' loop exits because its condition is false [-Wsometimes-uninitialized]
+                        for (int j=0; j < toSelectFrom.size(); j++){
+                                      ^~~~~~~~~~~~~~~~~~~~~~~
+../src/ant.cpp:189:17: note: uninitialized use occurs here
+                sequence[i] = selectedTask;
+                              ^~~~~~~~~~~~
+../src/ant.cpp:181:18: note: remove the condition if it is always true
+                        for (int j=0; j < toSelectFrom.size(); j++){
+                                      ^~~~~~~~~~~~~~~~~~~~~~~
+../src/ant.cpp:129:24: note: initialize the variable 'selectedTask' to silence this warning
+                long int selectedTask;
+                                     ^
+                                      = 0
+2 warnings generated.
+Finished building: ../src/ant.cpp
+ 
+Building target: ACO_FSP
+Invoking: MacOS X C++ Linker
+g++  -o "ACO_FSP"  ./src/aco.o ./src/ant.o ./src/fsp.o ./src/utils.o   
+Finished building target: ACO_FSP
+ 
+10:20:27 **** Incremental Build of configuration Debug for project ACO_FSP ****
+make all 
+Building file: ../src/ant.cpp
+Invoking: GCC C++ Compiler
+g++ -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"src/ant.d" -MT"src/ant.o" -o "src/ant.o" "../src/ant.cpp"
+../src/ant.cpp:91:17: warning: variable 'selectedTask' is used uninitialized whenever 'for' loop exits because its condition is false [-Wsometimes-uninitialized]
+                for (int j=0; j < toSelectFrom.size(); j++){
+                              ^~~~~~~~~~~~~~~~~~~~~~~
+../src/ant.cpp:97:17: note: uninitialized use occurs here
+                sequence[i] = selectedTask;
+                              ^~~~~~~~~~~~
+../src/ant.cpp:91:17: note: remove the condition if it is always true
+                for (int j=0; j < toSelectFrom.size(); j++){
+                              ^~~~~~~~~~~~~~~~~~~~~~~
+../src/ant.cpp:90:24: note: initialize the variable 'selectedTask' to silence this warning
+                long int selectedTask;
+                                     ^
+                                      = 0
+../src/ant.cpp:181:18: warning: variable 'selectedTask' is used uninitialized whenever 'for' loop exits because its condition is false [-Wsometimes-uninitialized]
+                        for (int j=0; j < toSelectFrom.size(); j++){
+                                      ^~~~~~~~~~~~~~~~~~~~~~~
+../src/ant.cpp:189:17: note: uninitialized use occurs here
+                sequence[i] = selectedTask;
+                              ^~~~~~~~~~~~
+../src/ant.cpp:181:18: note: remove the condition if it is always true
+                        for (int j=0; j < toSelectFrom.size(); j++){
+                                      ^~~~~~~~~~~~~~~~~~~~~~~
+../src/ant.cpp:129:24: note: initialize the variable 'selectedTask' to silence this warning
+                long int selectedTask;
+                                     ^
+                                      = 0
+2 warnings generated.
+Finished building: ../src/ant.cpp
+ 
+Building target: ACO_FSP
+Invoking: MacOS X C++ Linker
+g++  -o "ACO_FSP"  ./src/aco.o ./src/ant.o ./src/fsp.o ./src/utils.o   
+Finished building target: ACO_FSP
+ 
+10:20:55 **** Incremental Build of configuration Debug for project ACO_FSP ****
+make all 
+Building file: ../src/ant.cpp
+Invoking: GCC C++ Compiler
+g++ -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"src/ant.d" -MT"src/ant.o" -o "src/ant.o" "../src/ant.cpp"
+../src/ant.cpp:91:17: warning: variable 'selectedTask' is used uninitialized whenever 'for' loop exits because its condition is false [-Wsometimes-uninitialized]
+                for (int j=0; j < toSelectFrom.size(); j++){
+                              ^~~~~~~~~~~~~~~~~~~~~~~
+../src/ant.cpp:97:17: note: uninitialized use occurs here
+                sequence[i] = selectedTask;
+                              ^~~~~~~~~~~~
+../src/ant.cpp:91:17: note: remove the condition if it is always true
+                for (int j=0; j < toSelectFrom.size(); j++){
+                              ^~~~~~~~~~~~~~~~~~~~~~~
+../src/ant.cpp:90:24: note: initialize the variable 'selectedTask' to silence this warning
+                long int selectedTask;
+                                     ^
+                                      = 0
+../src/ant.cpp:181:18: warning: variable 'selectedTask' is used uninitialized whenever 'for' loop exits because its condition is false [-Wsometimes-uninitialized]
+                        for (int j=0; j < toSelectFrom.size(); j++){
+                                      ^~~~~~~~~~~~~~~~~~~~~~~
+../src/ant.cpp:189:17: note: uninitialized use occurs here
+                sequence[i] = selectedTask;
+                              ^~~~~~~~~~~~
+../src/ant.cpp:181:18: note: remove the condition if it is always true
+                        for (int j=0; j < toSelectFrom.size(); j++){
+                                      ^~~~~~~~~~~~~~~~~~~~~~~
+../src/ant.cpp:129:24: note: initialize the variable 'selectedTask' to silence this warning
+                long int selectedTask;
+                                     ^
+                                      = 0
+2 warnings generated.
+Finished building: ../src/ant.cpp
+ 
+Building target: ACO_FSP
+Invoking: MacOS X C++ Linker
+g++  -o "ACO_FSP"  ./src/aco.o ./src/ant.o ./src/fsp.o ./src/utils.o   
+Finished building target: ACO_FSP
+ 
+10:21:34 **** Incremental Build of configuration Debug for project ACO_FSP ****
+make all 
+Building file: ../src/ant.cpp
+Invoking: GCC C++ Compiler
+g++ -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"src/ant.d" -MT"src/ant.o" -o "src/ant.o" "../src/ant.cpp"
+../src/ant.cpp:91:17: warning: variable 'selectedTask' is used uninitialized whenever 'for' loop exits because its condition is false [-Wsometimes-uninitialized]
+                for (int j=0; j < toSelectFrom.size(); j++){
+                              ^~~~~~~~~~~~~~~~~~~~~~~
+../src/ant.cpp:97:17: note: uninitialized use occurs here
+                sequence[i] = selectedTask;
+                              ^~~~~~~~~~~~
+../src/ant.cpp:91:17: note: remove the condition if it is always true
+                for (int j=0; j < toSelectFrom.size(); j++){
+                              ^~~~~~~~~~~~~~~~~~~~~~~
+../src/ant.cpp:90:24: note: initialize the variable 'selectedTask' to silence this warning
+                long int selectedTask;
+                                     ^
+                                      = 0
+../src/ant.cpp:181:18: warning: variable 'selectedTask' is used uninitialized whenever 'for' loop exits because its condition is false [-Wsometimes-uninitialized]
+                        for (int j=0; j < toSelectFrom.size(); j++){
+                                      ^~~~~~~~~~~~~~~~~~~~~~~
+../src/ant.cpp:189:17: note: uninitialized use occurs here
+                sequence[i] = selectedTask;
+                              ^~~~~~~~~~~~
+../src/ant.cpp:181:18: note: remove the condition if it is always true
+                        for (int j=0; j < toSelectFrom.size(); j++){
+                                      ^~~~~~~~~~~~~~~~~~~~~~~
+../src/ant.cpp:129:24: note: initialize the variable 'selectedTask' to silence this warning
+                long int selectedTask;
+                                     ^
+                                      = 0
+2 warnings generated.
+Finished building: ../src/ant.cpp
+ 
+Building target: ACO_FSP
+Invoking: MacOS X C++ Linker
+g++  -o "ACO_FSP"  ./src/aco.o ./src/ant.o ./src/fsp.o ./src/utils.o   
+Finished building target: ACO_FSP
+ 
+10:22:35 **** Incremental Build of configuration Debug for project ACO_FSP ****
+make all 
+make: Nothing to be done for `all'.
+10:25:19 **** Incremental Build of configuration Debug for project ACO_FSP ****
 make all 
 Building file: ../src/aco.cpp
 Invoking: GCC C++ Compiler
@@ -7,26 +309,52 @@ In file included from ../src/aco.cpp:3:
 ../src/NEH.h:132:11: warning: unused variable 'tasks' [-Wunused-variable]
         long int tasks = fsp->getNumberOfTasks();
                  ^
-../src/aco.cpp:264:1: warning: control reaches end of non-void function [-Wreturn-type]
+../src/aco.cpp:280:1: warning: control reaches end of non-void function [-Wreturn-type]
 }
 ^
 2 warnings generated.
 Finished building: ../src/aco.cpp
+ 
+Building file: ../src/ant.cpp
+Invoking: GCC C++ Compiler
+g++ -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"src/ant.d" -MT"src/ant.o" -o "src/ant.o" "../src/ant.cpp"
+../src/ant.cpp:91:17: warning: variable 'selectedTask' is used uninitialized whenever 'for' loop exits because its condition is false [-Wsometimes-uninitialized]
+                for (int j=0; j < toSelectFrom.size(); j++){
+                              ^~~~~~~~~~~~~~~~~~~~~~~
+../src/ant.cpp:97:17: note: uninitialized use occurs here
+                sequence[i] = selectedTask;
+                              ^~~~~~~~~~~~
+../src/ant.cpp:91:17: note: remove the condition if it is always true
+                for (int j=0; j < toSelectFrom.size(); j++){
+                              ^~~~~~~~~~~~~~~~~~~~~~~
+../src/ant.cpp:90:24: note: initialize the variable 'selectedTask' to silence this warning
+                long int selectedTask;
+                                     ^
+                                      = 0
+../src/ant.cpp:178:18: warning: variable 'selectedTask' is used uninitialized whenever 'for' loop exits because its condition is false [-Wsometimes-uninitialized]
+                        for (int j=0; j < toSelectFrom.size(); j++){
+                                      ^~~~~~~~~~~~~~~~~~~~~~~
+../src/ant.cpp:186:17: note: uninitialized use occurs here
+                sequence[i] = selectedTask;
+                              ^~~~~~~~~~~~
+../src/ant.cpp:178:18: note: remove the condition if it is always true
+                        for (int j=0; j < toSelectFrom.size(); j++){
+                                      ^~~~~~~~~~~~~~~~~~~~~~~
+../src/ant.cpp:129:24: note: initialize the variable 'selectedTask' to silence this warning
+                long int selectedTask;
+                                     ^
+                                      = 0
+2 warnings generated.
+Finished building: ../src/ant.cpp
  
 Building target: ACO_FSP
 Invoking: MacOS X C++ Linker
 g++  -o "ACO_FSP"  ./src/aco.o ./src/ant.o ./src/fsp.o ./src/utils.o   
 Finished building target: ACO_FSP
  
-10:56:06 **** Incremental Build of configuration Debug for project ACO_FSP ****
+10:25:54 **** Incremental Build of configuration Debug for project ACO_FSP ****
 make all 
 make: Nothing to be done for `all'.
-10:57:16 **** Incremental Build of configuration Debug for project ACO_FSP ****
-make all 
-make: Nothing to be done for `all'.
-10:57:17 **** Incremental Build of configuration Debug for project ACO_FSP ****
-make all 
-make: Nothing to be done for `all'.
-10:57:18 **** Incremental Build of configuration Debug for project ACO_FSP ****
+10:26:07 **** Incremental Build of configuration Debug for project ACO_FSP ****
 make all 
 make: Nothing to be done for `all'.

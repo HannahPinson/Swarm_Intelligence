@@ -30,6 +30,7 @@ public:
 	long int getNumberOfTasks(){return n;};
 	long int getNumberOfMachines(){return m;};
 	long int getTime(long int machine, long int task){return (times[machine])[task];};
+	long int getDistance(long int task1, long int task2);
 };
 
 

@@ -44,8 +44,8 @@ class Ant{
        ~Ant();
        Ant(Ant const &other);
 
-       void Search(long int seed);
-       void searchMMAS(long int * best_sol_so_far, long int seed);
+       void Search(long int seed, double beta, double ** heuristic);
+       void searchMMAS(long int * best_sol_so_far, long int seed, double beta, double ** heuristic);
        long int getMakespan();
        long int * getSequence(){return sequence;};
        void setSequence(long int * seq){sequence = seq;};

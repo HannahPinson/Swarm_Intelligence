@@ -23,6 +23,7 @@ double beta;
 double rho;
 long int n_ants;
 long int seed = -1;
+int stagnation_count;
 
 
 vector<Ant> colony;
@@ -43,7 +44,7 @@ double stagnation_treshold;
 // Max Min Ant System variables
 double lower_limit;
 double upper_limit;
-double a = 1.5; //  lower limit = upper limit / a
+double a = 10; //  lower limit = upper limit / a
 
 
 
@@ -57,14 +58,14 @@ double sigma;
 void setDefaultParameters(){
 	alpha=1;
 	beta=1;
-	rho=0.1;
+	rho=0.2;
 	n_ants=5;
-	max_tours=50;
+	max_tours=100;
 	max_iterations= max_tours / n_ants;
 	instance_file="";
 	seed = (long int) time(NULL);
 
-	stagnation_treshold = 0.20;
+	stagnation_treshold = 10;
 	mutation_probability = 0.10;
 	sigma = 4;
 
@@ -128,6 +129,10 @@ bool readArguments(int argc, char *argv[] ){
 			mutation_probability = atol(argv[i+1]);
 			i++;
 		}
+		else if(strcmp(argv[i], "--a") == 0) {
+			a = atol(argv[i+1]);
+			i++;
+		}
 		else if(strcmp(argv[i], "--algo") == 0) {
 			algo = argv[i+1];
 			i++;
@@ -147,6 +152,7 @@ bool readArguments(int argc, char *argv[] ){
 	}
 	//printParameters();
 	max_iterations= max_tours / n_ants;
+	srand(seed);
 	return(true);
 }
 
@@ -160,10 +166,19 @@ void createColony (){
 }
 
 /*Initialize pheromone with an initial value*/
+// pheromone(i,j) gives the desirability to place at position i the job j
 void initializePheromone( double initial_value ) {
 	pheromone = new double * [tasks];
 	for (int i = 0 ; i < tasks ; i++ ) {
 		pheromone[i] = new double [tasks];
+		for (int j = 0  ; j < tasks ; j++ )
+			pheromone[i][j] = initial_value;
+	}
+}
+
+
+void resetPheromone(double initial_value){
+	for (int i = 0 ; i < tasks ; i++ ) {
 		for (int j = 0  ; j < tasks ; j++ )
 			pheromone[i][j] = initial_value;
 	}
@@ -182,6 +197,7 @@ void printMatrix ( double ** matrix ) {
 }
 
 // Initialize the heuristic information matrix
+// heuristic(i,j) gives the desirability to place job j after job i
 void initializeHeuristic () {
 	long int size = tasks;
 	heuristic = new double * [size];
@@ -189,7 +205,7 @@ void initializeHeuristic () {
 		heuristic[i] = new double [size];
 		for (int j = 0; j < size; j++){
 			if (i!=j){
-				heuristic[i][j] = 0; // 1./(tsp->getDistance(i,j));
+				heuristic[i][j] =  1./(fsp->getDistance(i,j));
 			}
 			else {
 				heuristic[i][j] = 0;
@@ -199,13 +215,14 @@ void initializeHeuristic () {
 }
 
 
-// Calculate probability in base of heuristic
-// information and pheromone
+// Calculate probability in base of pheromone
+// heuristic information is added during search process, since it is given in terms of two tasks
+// instead of a task and a position, as is the case with pheromone
 void calculateProbability () {
 	long int size = tasks;
 	for (int i = 0; i < size; i++){
 		for (int j = 0; j < size; j++){
-			(probability[i])[j] = pow(pheromone[i][j], alpha); // * pow(heuristic[i][j], beta);
+			(probability[i])[j] = pow(pheromone[i][j], alpha); //* pow(heuristic[i][j], beta);
 		}
 	}
 }
@@ -236,19 +253,18 @@ double mutate(){
 	for (int i = 0; i < tasks; i++){
 		for (int j = 0; j <tasks; j++){
 
-			/*long int seed = std::chrono::system_clock::now().time_since_epoch().count()/rand();
-			srand(seed);
-			double randVal = ((double) rand() / (RAND_MAX));*/
+			//long int seed = std::chrono::system_clock::now().time_since_epoch().count()/rand();
 
-			double randVal = ran01(&seed);
+			double randVal = ((double) rand() / (RAND_MAX));
+			srand(randVal * 10000000000);
+
+			//double randVal = ran01(&seed);
 
 			//mutate with probability = mutation_probability
 			if (mutation_probability > randVal){
-
-				/*seed = std::chrono::system_clock::now().time_since_epoch().count()/rand();
-				srand(seed);
-				randVal = ((double) rand() / (RAND_MAX));*/
-				randVal = ran01(&seed);
+				//randVal = ran01(&seed);
+				randVal = ((double) rand() / (RAND_MAX));
+				srand(randVal * 10000000000);
 
 				if (randVal < 0.5){ // a = 0 : add mutation value
 					(pheromone[i])[j] += mutationValue();
@@ -265,14 +281,15 @@ double mutate(){
 
 void setLimits(){
 	upper_limit = 1/(rho * global_best_makespan);
+	cout << "upper " << upper_limit << endl;
 	lower_limit = upper_limit / a;
+	cout << "lower " << lower_limit << endl;
 
 }
 
 
 //bring all pheromone values within range [lower_limit, upper_limit]
 void bound(){
-	setLimits();
 	for (int i = 0; i < tasks; i++){
 		for (int j = 0; j < tasks; j++){
 			if( (pheromone[i])[j] < lower_limit)
@@ -313,13 +330,14 @@ void depositPheromone(){
 }
 
 bool stagnation(){
-	int number_of_different_edges = 0;
+	/*int number_of_different_edges = 0;
 	for (int i = 0; i < tasks; i++){
 		if (iteration_worst_ant.getSequence()[i] != iteration_best_ant.getSequence()[i]){
 			number_of_different_edges++;
 		}
 	}
-	return ((double)number_of_different_edges / (double)tasks) < stagnation_treshold;
+	return ((double)number_of_different_edges / (double)tasks) < stagnation_treshold;*/
+	return stagnation_count > stagnation_treshold;
 }
 
 /*Check termination condition*/
@@ -391,10 +409,19 @@ int main(int argc, char *argv[] ){
 
 
 
+		printMatrix(heuristic);
 
+
+
+		stagnation_count = 0;
+		long int last_iteration_best_makespan = -1;
 
 		//Iterations loop
 		while(!terminationCondition()){
+
+			cout << "****************************" << endl;
+
+			printMatrix(pheromone);
 
 			iteration_worst_makespan = 0;
 			iteration_best_makespan = LONG_MAX;
@@ -404,12 +431,9 @@ int main(int argc, char *argv[] ){
 			for(int i=0; i< n_ants; i++){
 
 				if (algo == "bawa")
-					colony[i].Search(seed);
+					colony[i].Search(seed, beta, heuristic);
 				if (algo == "mmas")
-					colony[i].searchMMAS(global_best_ant.getSequence(), seed);
-
-
-
+					colony[i].searchMMAS(global_best_ant.getSequence(), seed, beta, heuristic);
 
 				if(global_best_makespan > colony[i].getMakespan()){
 					global_best_makespan = colony[i].getMakespan();
@@ -442,13 +466,20 @@ int main(int argc, char *argv[] ){
 			}
 
 
+			if (iteration_best_makespan == last_iteration_best_makespan)
+				stagnation_count ++;
+
 			if (stagnation()){
-				initializePheromone(initial_pheromone);
+				cout << "STAGNATION" << endl;
+				resetPheromone(initial_pheromone);
 				last_restart = iterations;
+				stagnation_count = 0;
 			}
+
 
 			calculateProbability();
 			iterations++;
+			last_iteration_best_makespan = iteration_best_makespan;
 		}
 
 		boxPlotFile << ":" << global_best_makespan ;
